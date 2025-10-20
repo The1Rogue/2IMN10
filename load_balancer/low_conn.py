@@ -27,7 +27,6 @@ async def proxy(read, write):
 async def handle_conn(source_read, source_write):
 	i = min(range(len(c)), key=c.__getitem__)
 	r = REMOTES[i]
-	print(r)
 	c[i] += 1
 
 	target_read, target_write = await asyncio.open_connection(r, PORT)

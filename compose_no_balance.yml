@@ -7,21 +7,6 @@ services:
     ports: ["6379:6379"]
     networks: [wcnet]
 
-  balancer:
-    image: ads:lab
-    container_name: wc_balancer
-    working_dir: /app/load_balancer
-    volumes:
-      - ./load_balancer:/app/load_balancer
-    environment:
-      - HOST=wc_balancer
-      - PORT=18861
-      - REMOTE=wc_server_alpha;wc_server_beta;wc_server_gamma
-    command: >
-      bash -lc "python -u round_robin.py"
-    ports: ["18861:18861"]
-    networks: [wcnet]
-
   server_alpha:
     image: ads:lab
     container_name: wc_server_alpha
@@ -37,43 +22,8 @@ services:
     command: >
       bash -lc "pip3 install --no-cache-dir redis &&
                 python server.py"
-    depends_on: [redis, balancer]
-    networks: [wcnet]
-
-  server_beta:
-    image: ads:lab
-    container_name: wc_server_beta
-    working_dir: /app/server
-    volumes:
-      - ./server:/app/server
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - TEXT_DIR=/app/server/texts
-      - SERVER_HOST=wc_server_beta
-      - SERVER_PORT=18861
-    command: >
-      bash -lc "pip3 install --no-cache-dir redis &&
-                python server.py"
-    depends_on: [redis, balancer]
-    networks: [wcnet]
-
-  server_gamma:
-    image: ads:lab
-    container_name: wc_server_gamma
-    working_dir: /app/server
-    volumes:
-      - ./server:/app/server
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - TEXT_DIR=/app/server/texts
-      - SERVER_HOST=wc_server_gamma
-      - SERVER_PORT=18861
-    command: >
-      bash -lc "pip3 install --no-cache-dir redis &&
-                python server.py"
-    depends_on: [redis, balancer]
+    depends_on: [redis]
+    ports: ["18861:18861"]
     networks: [wcnet]
 
   client_alpha:
@@ -84,13 +34,13 @@ services:
       - ./client:/app/client
       - ./client:/out
     environment:
-      - SERVER_HOST=wc_balancer
+      - SERVER_HOST=wc_server_alpha
       - SERVER_PORT=18861
       - NAME=alpha
       - BATCH=sea:moby_dick.txt;whale:moby_dick.txt;father:frankenstein.txt;parents:frankenstein.txt;artist:moby_dick.txt;sailor:moby_dick.txt
     command: >
       bash -lc "python -u client.py; pip3 install matplotlib; python -u plot_latency_phase3.py"
-    depends_on: [balancer]
+    depends_on: [server_alpha]
     networks: [wcnet]
 
   client_beta:
@@ -101,13 +51,13 @@ services:
       - ./client:/app/client
       - ./client:/out
     environment:
-      - SERVER_HOST=wc_balancer
+      - SERVER_HOST=wc_server_alpha
       - SERVER_PORT=18861
       - NAME=beta
       - BATCH=victor:frankenstein.txt;sea:moby_dick.txt;parents:frankenstein.txt;harpooneer:moby_dick.txt;sailor:moby_dick.txt;whale:moby_dick.txt
     command: >
       bash -lc "python -u client.py"
-    depends_on: [balancer]
+    depends_on: [server_alpha]
     networks: [wcnet]
 
   client_gamma:
@@ -118,13 +68,13 @@ services:
       - ./client:/app/client
       - ./client:/out
     environment:
-      - SERVER_HOST=wc_balancer
+      - SERVER_HOST=wc_server_alpha
       - SERVER_PORT=18861
       - NAME=gamma
       - BATCH=whale:moby_dick.txt;science:frankenstein.txt;sea:moby_dick.txt;sailor:moby_dick.txt;parents:frankenstein.txt;artist:moby_dick.txt
     command: >
       bash -lc "python -u client.py"
-    depends_on: [balancer]
+    depends_on: [server_alpha]
     networks: [wcnet]
 
   client_delta:
@@ -135,13 +85,13 @@ services:
       - ./client:/app/client
       - ./client:/out
     environment:
-      - SERVER_HOST=wc_balancer
+      - SERVER_HOST=wc_server_alpha
       - SERVER_PORT=18861
       - NAME=delta
       - BATCH=harpooneer:moby_dick.txt;whale:moby_dick.txt;science:frankenstein.txt;sea:moby_dick.txt;sailor:moby_dick.txt;parents:frankenstein.txt
     command: >
       bash -lc "python -u client.py"
-    depends_on: [balancer]
+    depends_on: [server_alpha]
     networks: [wcnet]
 
   client_epsilon:
@@ -152,13 +102,13 @@ services:
       - ./client:/app/client
       - ./client:/out
     environment:
-      - SERVER_HOST=wc_balancer
+      - SERVER_HOST=wc_server_alpha
       - SERVER_PORT=18861
       - NAME=epsilon
       - BATCH=artist:moby_dick.txt;victor:frankenstein.txt;whale:moby_dick.txt;science:frankenstein.txt;sea:moby_dick.txt;sailor:moby_dick.txt
     command: >
       bash -lc "python -u client.py"
-    depends_on: [balancer]
+    depends_on: [server_alpha]
     networks: [wcnet]
 
 networks:
