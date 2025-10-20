@@ -124,6 +124,38 @@ services:
     depends_on: [balancer]
     networks: [wcnet]
 
+  client_delta:
+    image: ads:lab
+    container_name: wc_client_delta
+    working_dir: /app/client
+    volumes:
+      - ./client:/app/client
+      - ./client:/out
+    environment:
+      - SERVER_HOST=wc_balancer
+      - SERVER_PORT=18861
+      - NAME=delta
+    command: >
+      bash -lc "python -u client.py"
+    depends_on: [balancer]
+    networks: [wcnet]
+
+  client_epsilon:
+    image: ads:lab
+    container_name: wc_client_epsilon
+    working_dir: /app/client
+    volumes:
+      - ./client:/app/client
+      - ./client:/out
+    environment:
+      - SERVER_HOST=wc_balancer
+      - SERVER_PORT=18861
+      - NAME=epsilon
+    command: >
+      bash -lc "python -u client.py"
+    depends_on: [balancer]
+    networks: [wcnet]
+
 networks:
   wcnet:
     driver: bridge

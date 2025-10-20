@@ -1,0 +1,7 @@
+req_id,keyword,filename,client_latency_ms,server_time_ms,cached,host
+1,sailor,moby_dick.txt,6.296,0.68,True,wc_server_gamma
+2,parents,frankenstein.txt,19.221,0.744,True,wc_server_gamma
+3,whale,moby_dick.txt,6.537,0.67,True,wc_server_gamma
+4,artist,moby_dick.txt,21.718,1.551,True,wc_server_gamma
+5,sea,moby_dick.txt,15.003,0.777,True,wc_server_gamma
+6,father,frankenstein.txt,17.387,0.702,True,wc_server_gamma
