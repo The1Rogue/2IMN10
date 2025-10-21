@@ -13,7 +13,7 @@ print(len(REMOTES))
 i = 0
 
 HEALTH_CHECK_PORT = int(os.getenv("CHECK_PORT", "18861"))
-HEALTH_CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "1"))
+HEALTH_CHECK_INTERVAL = float(os.getenv("CHECK_INTERVAL", "1"))
 HEALTH = [True for _ in REMOTES]
 
 async def proxy(read, write):
@@ -23,11 +23,9 @@ async def proxy(read, write):
 
 		write.write(data)
 		await write.drain()
-
 	write.close()
 
 async def health_check():
-
 	while True:
 		await asyncio.sleep(HEALTH_CHECK_INTERVAL)
 		for i, s in enumerate(REMOTES):
@@ -55,16 +53,19 @@ async def handle_conn(source_read, source_write):
 		if ti == i:
 			print("No healthy servers") # What to do?
 			break
-	
+
 
 	r = REMOTES[ti]
-	print(r)
 	i = (ti + 1) % len(REMOTES)
-	# print(i)
-	target_read, target_write = await asyncio.open_connection(r, PORT)
+#	target_read, target_write = await asyncio.open_connection(r, PORT, ssl_handshake_timeout=.003)
 
-	await asyncio.wait([proxy(source_read, target_write), proxy(target_read, source_write)])
-
+	try:
+		target_read, target_write = await asyncio.open_connection(r, PORT)
+		await asyncio.wait([proxy(source_read, target_write), proxy(target_read, source_write)])
+	except:
+		print(f"Server {r} failed during execution")
+		HEALTH[i] = False
+		source_write.close()
 
 
 loop = asyncio.get_event_loop()

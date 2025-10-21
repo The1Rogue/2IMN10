@@ -13,7 +13,8 @@ REMOTES = os.getenv("REMOTE", "wc_server").split(";")
 c = [0 for _ in REMOTES] #connection count
 
 HEALTH_CHECK_PORT = int(os.getenv("CHECK_PORT", "18861"))
-HEALTH_CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "1"))
+HEALTH_CHECK_INTERVAL = float(os.getenv("CHECK_INTERVAL", "1"))
+print(HEALTH_CHECK_INTERVAL)
 HEALTH = [True for _ in REMOTES]
 
 async def proxy(read, write):
@@ -46,8 +47,8 @@ async def health_check():
 			elif not is_healthy and HEALTH[i]:
 				print(f"Server {s} not ready for connections")
 			HEALTH[i] = is_healthy
-          
-             
+
+
 async def handle_conn(source_read, source_write):
 	healthy = [i for i, h in enumerate(HEALTH) if h]
 	if not healthy:
@@ -56,7 +57,7 @@ async def handle_conn(source_read, source_write):
 	i = min(healthy, key=c.__getitem__)
 
 	r = REMOTES[i]
-	# print(r)
+#	print(r)
 	c[i] += 1
 
 	try:
@@ -65,6 +66,7 @@ async def handle_conn(source_read, source_write):
 	except:
 		print(f"Server {r} failed during execution")
 		HEALTH[i] = False
+		source_write.close()
 	c[i] -= 1
 
 

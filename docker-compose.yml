@@ -17,6 +17,7 @@ services:
       - HOST=wc_balancer
       - PORT=18861
       - REMOTE=wc_server_alpha;wc_server_beta;wc_server_gamma
+      - CHECK_INTERVAL=0.01
     command: >
       bash -lc "python -u low_conn.py"
     ports: ["18861:18861"]
@@ -36,7 +37,7 @@ services:
       - SERVER_PORT=18861
     command: >
       bash -lc "pip3 install --no-cache-dir redis &&
-                python server.py"
+                python -u server.py"
     depends_on: [redis, balancer]
     networks: [wcnet]
 
@@ -52,9 +53,10 @@ services:
       - TEXT_DIR=/app/server/texts
       - SERVER_HOST=wc_server_beta
       - SERVER_PORT=18861
+      - FAILURE=15
     command: >
       bash -lc "pip3 install --no-cache-dir redis &&
-                python server.py"
+                python -u server.py"
     depends_on: [redis, balancer]
     networks: [wcnet]
 
@@ -72,7 +74,7 @@ services:
       - SERVER_PORT=18861
     command: >
       bash -lc "pip3 install --no-cache-dir redis &&
-                python server.py"
+                python -u server.py"
     depends_on: [redis, balancer]
     networks: [wcnet]
 
@@ -87,8 +89,9 @@ services:
       - SERVER_HOST=wc_balancer
       - SERVER_PORT=18861
       - NAME=alpha
+      - BATCH=sea:moby_dick.txt;whale:moby_dick.txt;father:frankenstein.txt;parents:frankenstein.txt;artist:moby_dick.txt;sailor:moby_dick.txt
     command: >
-      bash -lc "python -u client.py"
+      bash -lc "python -u client.py; pip3 install matplotlib; sleep 2; python -u plot_latency_phase4.py"
     depends_on: [balancer]
     networks: [wcnet]
 
@@ -103,6 +106,7 @@ services:
       - SERVER_HOST=wc_balancer
       - SERVER_PORT=18861
       - NAME=beta
+      - BATCH=victor:frankenstein.txt;sea:moby_dick.txt;parents:frankenstein.txt;harpooneer:moby_dick.txt;sailor:moby_dick.txt;whale:moby_dick.txt
     command: >
       bash -lc "python -u client.py"
     depends_on: [balancer]
@@ -119,6 +123,7 @@ services:
       - SERVER_HOST=wc_balancer
       - SERVER_PORT=18861
       - NAME=gamma
+      - BATCH=whale:moby_dick.txt;science:frankenstein.txt;sea:moby_dick.txt;sailor:moby_dick.txt;parents:frankenstein.txt;artist:moby_dick.txt
     command: >
       bash -lc "python -u client.py"
     depends_on: [balancer]
@@ -135,6 +140,7 @@ services:
       - SERVER_HOST=wc_balancer
       - SERVER_PORT=18861
       - NAME=delta
+      - BATCH=harpooneer:moby_dick.txt;whale:moby_dick.txt;science:frankenstein.txt;sea:moby_dick.txt;sailor:moby_dick.txt;parents:frankenstein.txt
     command: >
       bash -lc "python -u client.py"
     depends_on: [balancer]
@@ -151,6 +157,7 @@ services:
       - SERVER_HOST=wc_balancer
       - SERVER_PORT=18861
       - NAME=epsilon
+      - BATCH=artist:moby_dick.txt;victor:frankenstein.txt;whale:moby_dick.txt;science:frankenstein.txt;sea:moby_dick.txt;sailor:moby_dick.txt
     command: >
       bash -lc "python -u client.py"
     depends_on: [balancer]

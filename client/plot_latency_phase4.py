@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
 
-PNG = pathlib.Path("./latency_phase4.png")
+PNG = pathlib.Path("/out/latency_phase4.png")
 
 
 
@@ -15,7 +15,7 @@ cached_flags = []
 for c in range(5):
 	client = ["alpha", "beta", "gamma", "delta", "epsilon"][c]
 	for batch in range(5):
-		with pathlib.Path(f"./out/latency_phase4_{client}_{batch}.csv").open("r", encoding="utf-8") as file:
+		with pathlib.Path(f"/out/latency_phase4_{client}_{batch}.csv").open("r", encoding="utf-8") as file:
 			data = csv.DictReader(file)
 			for row in data:
 				xs.append(c + batch * 25 + int(row["req_id"]) * 5)
@@ -27,7 +27,7 @@ avg = statistics.mean(ys)
 p95 = float(np.percentile(np.array(ys), 95, interpolation="linear"))
 
 plt.figure(figsize=(7.5, 4.8))
-plt.title("Phase 4: Client-perceived execution latency per request")
+plt.title("Phase 4: execution latency (Lowest Connection balancer)")
 plt.xlabel("Request #")
 plt.ylabel("Latency (ms)")
 plt.grid(True, alpha=0.3)

@@ -8,6 +8,8 @@ REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
 TEXT_DIR   = os.getenv("TEXT_DIR", "/app/server/texts")
 SERVER_HOST= os.getenv("SERVER_HOST", "0.0.0.1")
 SERVER_PORT= int(os.getenv("SERVER_PORT", "18861"))
+FAILURE = int(os.getenv("FAILURE", "0"))
+c = 0
 
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
@@ -23,6 +25,11 @@ class WordCountService(rpyc.Service):
         """
         Returns: dict {count:int, cached:bool, server_time_ms:float, host:str}
         """
+        global c
+        c += 1
+        if c == FAILURE:
+            print("DYING")
+            server.close()
         t0 = time.perf_counter()
         keyword_norm = keyword.strip().lower()
         cache_key = f"wc:{filename}:{keyword_norm}"
@@ -51,3 +58,7 @@ if __name__ == "__main__":
     print(f"[server] starting on {SERVER_HOST}:{SERVER_PORT}, texts in {TEXT_DIR}")
     server = ThreadedServer(WordCountService, hostname=SERVER_HOST, port=SERVER_PORT)
     server.start()
+    if FAILURE > 0:
+        time.sleep(.02)
+        server = ThreadedServer(WordCountService, hostname=SERVER_HOST, port=SERVER_PORT)
+        server.start()
