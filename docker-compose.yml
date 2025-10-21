@@ -7,21 +7,6 @@ services:
     ports: ["6379:6379"]
     networks: [wcnet]
 
-  balancer:
-    image: ads:lab
-    container_name: wc_balancer
-    working_dir: /app/load_balancer
-    volumes:
-      - ./load_balancer:/app/load_balancer
-    environment:
-      - HOST=wc_balancer
-      - PORT=18861
-      - REMOTE=wc_server_alpha;wc_server_beta;wc_server_gamma
-    command: >
-      bash -lc "python -u low_conn.py"
-    ports: ["18861:18861"]
-    networks: [wcnet]
-
   server_alpha:
     image: ads:lab
     container_name: wc_server_alpha
@@ -37,43 +22,7 @@ services:
     command: >
       bash -lc "pip3 install --no-cache-dir redis &&
                 python server.py"
-    depends_on: [redis, balancer]
-    networks: [wcnet]
-
-  server_beta:
-    image: ads:lab
-    container_name: wc_server_beta
-    working_dir: /app/server
-    volumes:
-      - ./server:/app/server
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - TEXT_DIR=/app/server/texts
-      - SERVER_HOST=wc_server_beta
-      - SERVER_PORT=18861
-    command: >
-      bash -lc "pip3 install --no-cache-dir redis &&
-                python server.py"
-    depends_on: [redis, balancer]
-    networks: [wcnet]
-
-  server_gamma:
-    image: ads:lab
-    container_name: wc_server_gamma
-    working_dir: /app/server
-    volumes:
-      - ./server:/app/server
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - TEXT_DIR=/app/server/texts
-      - SERVER_HOST=wc_server_gamma
-      - SERVER_PORT=18861
-    command: >
-      bash -lc "pip3 install --no-cache-dir redis &&
-                python server.py"
-    depends_on: [redis, balancer]
+    depends_on: [redis]
     networks: [wcnet]
 
   client_alpha:
@@ -84,12 +33,12 @@ services:
       - ./client:/app/client
       - ./client:/out
     environment:
-      - SERVER_HOST=wc_balancer
+      - SERVER_HOST=wc_server_alpha
       - SERVER_PORT=18861
       - NAME=alpha
     command: >
       bash -lc "python -u client.py"
-    depends_on: [balancer]
+    depends_on: [server_alpha]
     networks: [wcnet]
 
   client_beta:
@@ -100,12 +49,12 @@ services:
       - ./client:/app/client
       - ./client:/out
     environment:
-      - SERVER_HOST=wc_balancer
+      - SERVER_HOST=wc_server_alpha
       - SERVER_PORT=18861
       - NAME=beta
     command: >
       bash -lc "python -u client.py"
-    depends_on: [balancer]
+    depends_on: [server_alpha]
     networks: [wcnet]
 
   client_gamma:
@@ -116,12 +65,44 @@ services:
       - ./client:/app/client
       - ./client:/out
     environment:
-      - SERVER_HOST=wc_balancer
+      - SERVER_HOST=wc_server_alpha
       - SERVER_PORT=18861
       - NAME=gamma
     command: >
       bash -lc "python -u client.py"
-    depends_on: [balancer]
+    depends_on: [server_alpha]
+    networks: [wcnet]
+
+  client_delta:
+    image: ads:lab
+    container_name: wc_client_delta
+    working_dir: /app/client
+    volumes:
+      - ./client:/app/client
+      - ./client:/out
+    environment:
+      - SERVER_HOST=wc_server_alpha
+      - SERVER_PORT=18861
+      - NAME=delta
+    command: >
+      bash -lc "python -u client.py"
+    depends_on: [server_alpha]
+    networks: [wcnet]
+
+  client_epsilon:
+    image: ads:lab
+    container_name: wc_client_epsilon
+    working_dir: /app/client
+    volumes:
+      - ./client:/app/client
+      - ./client:/out
+    environment:
+      - SERVER_HOST=wc_server_alpha
+      - SERVER_PORT=18861
+      - NAME=epsilon
+    command: >
+      bash -lc "python -u client.py"
+    depends_on: [server_alpha]
     networks: [wcnet]
 
 networks:
